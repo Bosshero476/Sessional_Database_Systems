@@ -1,0 +1,214 @@
+1.Database_Schema_Q1
+
+CREATE DATABASE database_schema_q1
+
+(i)
+CREATE TABLE customer (
+	cust_id int(20) NOT NULL,
+    cust_name varchar(30),
+    PRIMARY KEY (cust_id)
+);
+
+CREATE TABLE item(
+	item_id int(20) NOT NULL,
+	item_name varchar(40),
+	price int(20),
+	Primary key (item_id)
+);
+
+
+CREATE TABLE sale(
+	bill_no int(20) NOT NULL,
+	bill_date date,
+	qty_sold int(20),
+	PRIMARY KEY (bill_no)
+);
+
+CREATE TABLE relation_r_i(
+	cust_id int,
+    FOREIGN KEY (cust_id) REFERENCES customer (cust_id),
+	item_id int,
+    FOREIGN KEY (item_id) REFERENCES item (item_id),
+	bill_no int,
+	FOREIGN KEY (bill_no) REFERENCES sale (bill_no)
+);
+
+INSERT INTO customer 
+	(cust_id, cust_name)
+	VALUES 
+    	(101,"Tamim"),
+        (102,"Soumya"),
+        (103,"Liton"),
+        (104,"Mahmudullah"),
+        (105,"Musfiq"),
+        (106,"Sakib"),
+        (107,"Sohan"),
+        (108,"Mahedi"),
+        (109,"Mustafizur"),
+        (110,"Nasum");
+
+INSERT INTO item (
+	item.item_id, item.item_name, item.price
+)
+	VALUES 
+    (10001,"icecream,300),
+    (10002,"sugar",50),
+    (10003,"chips",100),
+    (10004,"pen",10),
+    (10005,"cokies",200),
+    (10006,"choclate",400),
+    (10007,"biscuit",200),
+    (10008,"nuts",200),
+    (10009,"juice",70),
+(10010,"tea",15);
+
+INSERT INTO sale 
+	( bill_no, bill_date, qty_sold )
+	VALUES
+    	(1,"2021-07-01",15),
+    	(2,"2021-07-01",20),
+        (3,"2021-07-02",20),
+        (4,"2021-07-03",12),
+        (5,"2021-07-04",5),
+        (6,"2021-07-04",8),
+        (7,"2021-07-04",25),
+        (8,"2021-07-05",28),
+        (9,"2021-07-06",32),
+        (10,"2021-07-07",35);
+
+INSERT INTO relation_r_i
+	(cust_id, item_id, bill_no)
+	VALUES
+    	(101,10001,5),
+    	(103,10002,8),
+        (102,10003,1),
+        (105,10004,3),
+        (104,10005,4),
+        (107,10006,7),
+        (106,10007,9),
+        (109,10008,2),
+        (108,10009,10),
+        (110,10010,6);
+
+(iii) SELECT cust_id, qty_sold, bill_no FROM relation_r_i JOIN sale USING (bill_no);
+
+(iv) SELECT bill_no, item_id,qty_sold, (price * qty_sold) as total_price FROM item JOIN(SELECT bill_no, item_id, qty_sold FROM relation_r_i JOIN sale USING (bill_no)) AS List_of_total_price USING (item_id);
+
+(v)SELECT item_id, SUM(qty_sold) as TOTAL_Quantity_Of_Sold FROM relation_r_i JOIN sale USING (bill_no)
+WHERE bill_date BETWEEN '2021-07-01' AND '2021-07-31' GROUP BY (item_id);
+
+(vi)SELECT bill_no,item_id,qty_sold,(price*qty_sold) AS TOTAL_PRICE,(price*qty_sold*.8) AS DISCOUNTED_PRICE
+FROM item JOIN(SELECT bill_no,item_id,qty_sold FROM relation_r_i JOIN sale USING (bill_no)) AS DISCOUNTED_TABLE
+USING (item_id)HAVING total_price >= 3000;
+
+
+2.Design Tour:
+
+CREATE DATABASE Tour_Q2;
+
+CREATE TABLE Bus (
+    BUS_NO int(5) NOT NULL, 
+	SOURCE varchar(20), 
+	DESTINATION varchar(20), 
+	COACH_TYPE varchar(10), 
+	FAIR int(4), 
+    PRIMARY KEY (BUS_NO)
+); 
+
+CREATE TABLE Reservation (
+    PNR_NO int(9), 
+    NO_OF_SEATS int(8), 
+    ADDRESS varchar(50), 
+    CONTACT_NO int(10), 
+    STATUS char(3),
+    PRIMARY KEY (PNR_NO)
+);
+
+CREATE TABLE Ticket (
+    TICKET_NO int(9) NOT NULL,
+    AGE int(4),
+    SEX char(6) NOT NULL,
+    SOURCE varchar(20),
+    DESTINATION varchar(20),
+    DEP_TIME varchar(20),
+    JOURNEY_DATE date,
+PRIMARY KEY(TICKET_NO),
+BUS_NO int(5) NOT NULL, 
+FOREIGN KEY (BUS_NO) REFERENCES bus (BUS_NO)
+);
+
+CREATE TABLE Passenger (
+    TICKET_NO int(9) NOT NULL, 
+    NAME varchar(40), 
+    AGE int(4), 
+    SEX char(6) NOT NULL, 
+    CONTACT_NO int(10),
+    PRIMARY KEY (CONTACT_NO),
+    FOREIGN KEY (TICKET_NO) REFERENCES ticket (TICKET_NO)
+);
+
+CREATE TABLE Cancellation (
+    PNR_NO int(9),
+    NO_OF_SEATS int(8),
+    ADDRESS varchar(50),
+    CONTACT_NO int,
+    STATUS char(3),
+    FOREIGN KEY (PNR_NO) REFERENCES reservation (PNR_NO),
+    FOREIGN KEY (CONTACT_NO) REFERENCES passenger (CONTACT_NO)
+);
+
+INSERT INTO bus (
+    BUS_NO, SOURCE, DESTINATION, COACH_TYPE, FAIR) 
+    VALUES 
+    ('20', 'Dhaka', 'Rajshahi', 'AC', 1600),
+    ('22', 'Rajshahi', 'Dhaka', 'AC', 860),
+    ('30', 'Dhaka', 'Khulna', 'Non AC', 800),
+    ('35', 'Chittagong', 'Dhaka', 'AC', 2000),
+('40', 'Dhaka', 'Kolkata', 'AC', 5300);
+
+INSERT INTO ticket (
+    TICKET_NO, AGE, SEX, SOURCE, DESTINATION, DEP_TIME, JOURNEY_DATE, BUS_NO)
+    VALUES 
+    ('301', '25', 'Male', 'Dhaka', 'Rajshahi', '12:00PM', '2021-07-01', '20'),
+    ('302', '17', 'Male', 'Rajshahi', 'Dhaka', '12:00PM', '2021-07-01', '22'),
+    ('303', '45', 'Female', 'Dhaka', 'Khulna', '11:00PM', '2021-07-01', '30'),
+    ('304', '55', 'Female', 'Chittagong', 'Dhaka', '12:00PM', '2021-07-01', '35'),
+('305', '65', 'Male', 'Dhaka', 'Kolkata', '11:00PM', '2021-07-01', '40');
+
+INSERT INTO passenger (
+    TICKET_NO, NAME, AGE, SEX, CONTACT_NO)
+    VALUES 
+    ('301', 'Tamim', '25', 'Male', 01812375570),
+    ('302', 'Liton', '17', 'Male', 01813050250),
+    ('303', 'Shisir', '45', 'Female', 01675641332),
+    ('304', 'Fahmida', '55', 'Female', 01813050251),
+	('305', 'Sakib', '65', 'Male', 01812376560);
+
+INSERT INTO reservation (
+    PNR_NO, NO_OF_SEATS, ADDRESS, CONTACT_NO, STATUS) 
+    VALUES 
+    ('1', '5', '1216 Mirpur, Dhaka', 01812375570, 'booked'),
+    ('2', '1', '235, Vodra, Rajshahi', 01813050250, 'booked'),
+    ('3', '4', 'Modonhata, Gulistan,1212', 01675641332, 'booked'),
+    ('4', '2', 'Kamalpur,Chittagong, 1217', 01813050251, 'booked'),
+('5', '1', 'Rupnagar, Mirpur, 1215', 01812376560, 'booked');
+
+
+INSERT INTO cancellation (
+    PNR_NO, NO_OF_SEATS, ADDRESS, CONTACT_NO, STATUS) 
+    VALUES 
+    ('3', '4', 'Modonhata, Gulistan, 1212', 01675641332, 'cancel'),
+    ('5', '1', 'Rupnagar, Mirpur, 1215', 01812376560, 'cancel');
+
+(i)SELECT COUNT(TICKET_NO) as TOTAL_BOOKED_TICKET FROM ticket WHERE BUS_NO = 22 AND JOURNEY_DATE = '2021-07-01' AND DEP_TIME = '12:00PM' GROUP BY BUS_NO;
+
+(ii) SELECT COUNT(TICKET_NO) as Canceled_Ticket_In_Month_Of_July FROM ticket WHERE TICKET_NO IN (SELECT TICKET_NO FROM passenger WHERE CONTACT_NO IN (SELECT CONTACT_NO FROM cancellation JOIN reservation USING (PNR_NO, CONTACT_NO))) AND JOURNEY_DATE BETWEEN '2021-07-01' AND '2021-07-31';
+
+(iii)SELECT TICKET_NO, BUS_NO, NAME, AGE, SEX, SOURCE, DESTINATION, DEP_TIME, JOURNEY_DATE FROM ticket INNER JOIN passenger USING (TICKET_NO, AGE, SEX)WHERE BUS_NO = 22 AND JOURNEY_DATE = '2021-07-01' AND DEP_TIME = '12:00PM' AND AGE < 18;
+
+
+
+
+
+
+
